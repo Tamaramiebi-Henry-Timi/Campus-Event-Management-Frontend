@@ -1,4 +1,4 @@
-# 📅 Campus Event Management Hub
+# 📅 Campus Event Management
 
 ## Features
 ### 🚀 Frontend
