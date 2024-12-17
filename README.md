@@ -30,6 +30,9 @@
 -**Admin_Email**: tamaramiebi.timi@acity.edu.gh
 -**Admin_Password**: admin123
 
+## ⚙️Backend Code
+-**Access the backend code from**: [GitHub Repository Link](https://github.com/Tamaramiebi-Henry-Timi/Campus-Event-Management.git)
+
 ## 📂Project Structure
 ```
 campus-event-management-frontend/
