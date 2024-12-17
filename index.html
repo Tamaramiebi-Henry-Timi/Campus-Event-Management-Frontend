@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Campus Event Management Hub</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/6.1.4/index.global.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .navbar {
+            background-color: #343a40;
+        }
+        .navbar-brand {
+            color: #ffffff;
+        }
+        .btn-primary {
+            background-color: #007bff;
+            border: none;
+        }
+        #login-page, #register-page, #events-page, #add-event-page {
+            display: none;
+        }
+        #calendar {
+            min-height: 500px;
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body>
+    <!-- Login Page -->
+    <div id="login-page">
+        <div class="container mt-5">
+            <div class="row justify-content-center">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header text-white bg-primary">Login</div>
+                        <div class="card-body">
+                            <form id="login-form">
+                                <div class="mb-3">
+                                    <label for="login-email" class="form-label">Email</label>
+                                    <input type="email" class="form-control" id="login-email" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="login-password" class="form-label">Password</label>
+                                    <input type="password" class="form-control" id="login-password" required>
+                                </div>
+                                <button type="submit" class="btn btn-primary">Login</button>
+                                <button type="button" class="btn btn-link" id="go-to-register">Register</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Register Page -->
+    <div id="register-page">
+        <div class="container mt-5">
+            <div class="row justify-content-center">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header text-white bg-primary">Register</div>
+                        <div class="card-body">
+                            <form id="register-form">
+                                <div class="mb-3">
+                                    <label for="register-email" class="form-label">Email</label>
+                                    <input type="email" class="form-control" id="register-email" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="register-password" class="form-label">Password</label>
+                                    <input type="password" class="form-control" id="register-password" required>
+                                </div>
+                                <button type="submit" class="btn btn-primary">Register</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Events Page -->
+    <div id="events-page">
+        <nav class="navbar navbar-expand-lg navbar-dark">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="#">Event Hub</a>
+                <button class="btn btn-danger" id="logout-button">Logout</button>
+            </div>
+        </nav>
+        <div class="container mt-4">
+            <div class="row">
+                <!-- Event List -->
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-header text-white bg-primary">Event Listings</div>
+                        <div class="card-body">
+                            <div id="events-list"></div>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary mt-3" id="go-to-add-event">Add Event</button>
+                </div>
+                <!-- Calendar -->
+                <div class="col-md-8">
+                    <div class="card">
+                        <div class="card-header text-white bg-primary">Calendar</div>
+                        <div class="card-body">
+                            <div id="calendar"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Event Page -->
+    <div id="add-event-page">
+        <div class="container mt-5">
+            <div class="row justify-content-center">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header text-white bg-primary">Add Event</div>
+                        <div class="card-body">
+                            <form id="add-event-form">
+                                <div class="mb-3">
+                                    <label for="event-name" class="form-label">Event Name</label>
+                                    <input type="text" class="form-control" id="event-name" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="event-date" class="form-label">Date</label>
+                                    <input type="date" class="form-control" id="event-date" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="event-time" class="form-label">Time</label>
+                                    <input type="time" class="form-control" id="event-time" required>
+                                </div>
+                                <button type="submit" class="btn btn-primary">Add Event</button>
+                                <button type="button" class="btn btn-secondary" id="back-to-events">Back</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- External Libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/6.1.4/index.global.min.js"></script>
+    <script>
+        const apiUrl = 'http://localhost:3000';
+    
+        // Page Navigation
+        function showPage(pageId) {
+            document.querySelectorAll('div[id$="-page"]').forEach(page => page.style.display = 'none');
+            document.getElementById(pageId).style.display = 'block';
+        }
+    
+        // Register Navigation
+        document.getElementById('go-to-register').addEventListener('click', () => showPage('register-page'));
+    
+        // Register Form
+        document.getElementById('register-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('register-email').value;
+            const password = document.getElementById('register-password').value;
+    
+            try {
+                await axios.post(`${apiUrl}/register`, { email, password });
+                alert('Registration successful! Please log in.');
+                showPage('login-page');
+            } catch (err) {
+                alert('Registration failed');
+            }
+        });
+    
+        // Login Form
+        document.getElementById('login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+    
+            try {
+                const response = await axios.post(`${apiUrl}/login`, { email, password });
+                localStorage.setItem('token', response.data.token);
+                await fetchEvents();
+                loadCalendar();
+                showPage('events-page');
+            } catch (err) {
+                alert('Login failed');
+            }
+        });
+    
+        // Logout Button Fix
+        document.getElementById('logout-button').addEventListener('click', () => {
+            localStorage.removeItem('token'); // Clear token
+            alert('You have been logged out.');
+            showPage('login-page'); // Redirect to login page
+        });
+    
+        // Fetch and Display Events
+        async function fetchEvents() {
+            try {
+                const response = await axios.get(`${apiUrl}/events`, {
+                    headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+                });
+                const eventsList = document.getElementById('events-list');
+                eventsList.innerHTML = '';
+                response.data.forEach(event => {
+                    eventsList.innerHTML += `
+                        <div class="mb-3">
+                            <h5>${event.name}</h5>
+                            <p>${new Date(event.date).toDateString()} - ${event.time}</p>
+                        </div>
+                    `;
+                });
+            } catch (err) {
+                console.error('Failed to fetch events', err);
+                alert('Failed to fetch events');
+            }
+        }
+    
+        // Add Event Form Fix
+        document.getElementById('add-event-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const name = document.getElementById('event-name').value;
+            const date = document.getElementById('event-date').value;
+            const time = document.getElementById('event-time').value;
+    
+            try {
+                await axios.post(`${apiUrl}/events`, { name, date, time }, {
+                    headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+                });
+                alert('Event added successfully!');
+                await fetchEvents();
+                loadCalendar();
+                showPage('events-page');
+            } catch (err) {
+                console.error('Failed to add event', err);
+                alert('Failed to add event');
+            }
+        });
+    
+        // Calendar Initialization
+        function loadCalendar() {
+            const calendarEl = document.getElementById('calendar');
+            calendarEl.innerHTML = ''; // Clear existing calendar
+            const calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth',
+                height: 'auto',
+                events: async function () {
+                    try {
+                        const response = await axios.get(`${apiUrl}/events`, {
+                            headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+                        });
+                        return response.data.map(event => ({
+                            title: event.name,
+                            start: event.date,
+                            allDay: true
+                        }));
+                    } catch (err) {
+                        console.error('Failed to load calendar events', err);
+                        return [];
+                    }
+                }
+            });
+            calendar.render();
+        }
+    
+        // Navigation Buttons
+        document.getElementById('go-to-add-event').addEventListener('click', () => showPage('add-event-page'));
+        document.getElementById('back-to-events').addEventListener('click', () => showPage('events-page'));
+    
+        // Initial Page Load
+        document.addEventListener('DOMContentLoaded', () => showPage('login-page'));
+    </script>
+    
+</body>
+</html>
